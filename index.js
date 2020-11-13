@@ -1,5 +1,15 @@
 var fieldSize = '4';
 var gameFlag = true;
+var timer = {
+    hours: "0",
+    minuts: "0",
+    seconds: "0"
+};
+var emptyCell = {
+    left: "0",
+    top: "0"
+};
+let time = document.querySelector('#time');
 const optionBoard = document.querySelector('.option-board');
 const startScreen = document.querySelector('.start-screen');
 const fieldScreen = document.querySelector('.field');
@@ -28,9 +38,36 @@ function initCellCount() {
     return fieldSize * fieldSize;
 }
 
+console.log(time);
+function timerStart() {
+    timer.seconds++;
+    if (timer.seconds == 60) {
+        timer.minuts++;
+        timer.seconds = 0;
+    }
+    if (timer.minuts == 60) {
+        timer.hours++;
+        timer.minuts = 0;
+    }
+    time.innerHTML = `${timer.hours} : ${timer.minuts} : ${timer.seconds}`;
+}
+
 function gameInit() {
+    setInterval(timerStart, 1000);
     var cellSize = 480 / Number(fieldSize);
     let cellCount = initCellCount();
+    
+    let moveOnEmpty = function(cell) {
+        let emptyCellTop = emptyCell.top;
+        let emptyCellLeft = emptyCell.left;
+
+        emptyCell.top = this.style.top;
+        emptyCell.left = this.style.left;
+
+        this.style.top = emptyCellTop;
+        this.style.left = emptyCellLeft;
+    }
+
     for (let i = 1; i < cellCount; i++) {
         const cell = document.createElement('div');
         cell.classList.add('cell');
@@ -39,10 +76,12 @@ function gameInit() {
         cell.style.height = `${cellSize - 5}px`;
 
         let left = i % fieldSize;
-        let top = (i - left)/fieldSize;
+        let top = (i - left) / fieldSize;
 
         cell.style.top = `${top * cellSize}px`;
         cell.style.left = `${left * cellSize}px`;
         fieldScreen.append(cell);
+        cell.addEventListener('click',moveOnEmpty);
     }
+   
 }
