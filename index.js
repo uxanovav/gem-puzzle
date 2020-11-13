@@ -6,10 +6,13 @@ var timer = {
     seconds: "0"
 };
 var emptyCell = {
-    left: "0",
-    top: "0"
+    left: 0,
+    top: 0
 };
+var stepCount = 0;
 let time = document.querySelector('#time');
+let turns = document.querySelector('#turns');
+const back = document.querySelector('#back');
 const optionBoard = document.querySelector('.option-board');
 const startScreen = document.querySelector('.start-screen');
 const fieldScreen = document.querySelector('.field');
@@ -20,6 +23,12 @@ startButton.addEventListener('click', () => {
     fieldScreen.style.display = "block";
     gameFlag = true;
     gameInit();
+})
+
+back.addEventListener('click', () => {
+    startScreen.style.display = "block";
+    fieldScreen.style.display = "none";
+    gameFlag = false;
 })
 
 let arr = optionBoard.childNodes;
@@ -56,16 +65,29 @@ function gameInit() {
     setInterval(timerStart, 1000);
     var cellSize = 480 / Number(fieldSize);
     let cellCount = initCellCount();
-    
-    let moveOnEmpty = function(cell) {
-        let emptyCellTop = emptyCell.top;
-        let emptyCellLeft = emptyCell.left;
 
-        emptyCell.top = this.style.top;
-        emptyCell.left = this.style.left;
+    const state = [];
+    state.push(emptyCell);
 
-        this.style.top = emptyCellTop;
-        this.style.left = emptyCellLeft;
+    function moveOnEmpty(i) {
+        const cell = state[i];
+        const empty = state[0];
+        console.log(empty.top, cell.top);
+        if (((Math.abs(empty.top - cell.top) <= 1) && (empty.left == cell.left)) || ((Math.abs(empty.left - cell.left) <= 1) && (empty.top == cell.top))) {
+            cell.el.style.top = `${empty.top * cellSize}px`;
+            cell.el.style.left = `${empty.left * cellSize}px`;
+            let emptyCellTop = empty.top;
+            let emptyCellLeft = empty.left;
+
+            empty.top = cell.top;
+            empty.left = cell.left;
+
+            cell.top = emptyCellTop;
+            cell.left = emptyCellLeft;
+            stepCount++;
+            turns.innerHTML = stepCount;
+        }
+
     }
 
     for (let i = 1; i < cellCount; i++) {
@@ -75,13 +97,17 @@ function gameInit() {
         cell.style.width = `${cellSize - 5}px`;
         cell.style.height = `${cellSize - 5}px`;
 
-        let left = i % fieldSize;
-        let top = (i - left) / fieldSize;
+        const left = i % fieldSize;
+        const top = (i - left) / fieldSize;
 
         cell.style.top = `${top * cellSize}px`;
         cell.style.left = `${left * cellSize}px`;
+
+        state.push({ left: left, top: top, el: cell });
         fieldScreen.append(cell);
-        cell.addEventListener('click',moveOnEmpty);
+        cell.addEventListener('click', () => {
+            moveOnEmpty(i)
+        });
+        console.log(state);
     }
-   
 }
